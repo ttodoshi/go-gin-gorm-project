@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"goGinGormProject/internal/core/domain"
+	"goGinGormProject/internal/adapters/dto"
 	"goGinGormProject/internal/core/ports"
 	"log"
 )
@@ -28,26 +28,23 @@ func (h *PostHandler) GetPostByUUID(c *gin.Context) {
 }
 
 func (h *PostHandler) GetPosts(c *gin.Context) {
-	c.JSON(200, h.svc.GetPosts())
+	posts, err := h.svc.GetPosts()
+	if err != nil {
+		c.Status(500)
+		return
+	}
+	c.JSON(200, posts)
 }
 
 func (h *PostHandler) CreatePost(c *gin.Context) {
-	var body struct { // TODO: Dto
-		Body  string
-		Title string
-	}
+	var createPostDto dto.CreatePostDto
 
-	err := c.Bind(&body)
+	err := c.Bind(&createPostDto)
 	if err != nil {
 		log.Print("error mapping body")
 	}
 
-	newPost := domain.Post{
-		Title: body.Title,
-		Body:  body.Body,
-	}
-
-	postUUID, err := h.svc.CreatePost(newPost)
+	postUUID, err := h.svc.CreatePost(createPostDto)
 
 	if err != nil {
 		c.Status(500)
@@ -55,29 +52,21 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	}
 
 	c.JSON(201, gin.H{
-		"UUID": postUUID,
+		"uuid": postUUID,
 	})
 }
 
 func (h *PostHandler) UpdatePostByUUID(c *gin.Context) {
 	uuid := c.Param("uuid")
 
-	var body struct { // TODO: Dto
-		Body  string
-		Title string
-	}
+	var updatePostDto dto.UpdatePostDto
 
-	err := c.Bind(&body)
+	err := c.Bind(&updatePostDto)
 	if err != nil {
 		log.Print("error mapping body")
 	}
 
-	post := domain.Post{
-		Title: body.Title,
-		Body:  body.Body,
-	}
-
-	updatedPost, err := h.svc.UpdatePostByUUID(uuid, post)
+	updatedPost, err := h.svc.UpdatePostByUUID(uuid, updatePostDto)
 	if err != nil {
 		c.Status(404)
 		return

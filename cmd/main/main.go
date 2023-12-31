@@ -3,28 +3,24 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"goGinGormProject/internal/adapters/handler"
-	"goGinGormProject/internal/adapters/repository"
+	"goGinGormProject/internal/adapters/repository/postgres"
 	"goGinGormProject/internal/core/ports"
 	"goGinGormProject/internal/core/servises"
-	"goGinGormProject/pkg/database/postgres"
 	"goGinGormProject/pkg/env"
-	"gorm.io/gorm"
 	"log"
 )
 
 var (
-	db          *gorm.DB
 	postService ports.PostService
 )
 
 func init() {
 	env.LoadEnvVariables()
-	db = postgres.ConnectToDb()
 }
 
-// TODO: logging, error handling, dto, tests
+// TODO: logging, error handling, tests
 func main() {
-	postRepository := repository.NewPostRepository(db)
+	postRepository := postgres.NewPostRepository()
 	postService = servises.NewPostService(postRepository)
 	initRoutes()
 }
