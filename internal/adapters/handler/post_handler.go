@@ -42,6 +42,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	err := c.Bind(&createPostDto)
 	if err != nil {
 		log.Print("error mapping body")
+		return
 	}
 
 	postUUID, err := h.svc.CreatePost(createPostDto)
@@ -64,6 +65,7 @@ func (h *PostHandler) UpdatePostByUUID(c *gin.Context) {
 	err := c.Bind(&updatePostDto)
 	if err != nil {
 		log.Print("error mapping body")
+		return
 	}
 
 	updatedPost, err := h.svc.UpdatePostByUUID(uuid, updatePostDto)
