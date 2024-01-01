@@ -18,7 +18,7 @@ func init() {
 	env.LoadEnvVariables()
 }
 
-// TODO: logging, error handling, tests
+// TODO: logging, tests
 func main() {
 	postRepository := postgres.NewPostRepository()
 	postService = servises.NewPostService(postRepository)
@@ -28,12 +28,21 @@ func main() {
 func initRoutes() {
 	r := gin.Default()
 
-	postHandler := handler.NewPostHandler(postService)
-	r.GET("/api/v1/posts/:uuid", postHandler.GetPostByUUID)
-	r.GET("/api/v1/posts", postHandler.GetPosts)
-	r.POST("/api/v1/posts", postHandler.CreatePost)
-	r.PUT("/api/v1/posts/:uuid", postHandler.UpdatePostByUUID)
-	r.DELETE("/api/v1/posts/:uuid", postHandler.DeletePostByUUID)
+	r.Use(handler.ErrorHandlerMiddleware())
+
+	apiGroup := r.Group("/api")
+
+	v1ApiGroup := apiGroup.Group("/v1")
+
+	v1PostsGroup := v1ApiGroup.Group("/posts")
+	{
+		postHandler := handler.NewPostHandler(postService)
+		v1PostsGroup.GET("/:uuid", postHandler.GetPostByUUID)
+		v1PostsGroup.GET("/", postHandler.GetPosts)
+		v1PostsGroup.POST("/", postHandler.CreatePost)
+		v1PostsGroup.PUT("/:uuid", postHandler.UpdatePostByUUID)
+		v1PostsGroup.DELETE("/:uuid", postHandler.DeletePostByUUID)
+	}
 
 	err := r.Run()
 	if err != nil {

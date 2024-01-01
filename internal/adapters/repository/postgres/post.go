@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"goGinGormProject/internal/core/domain"
+	"goGinGormProject/internal/core/errors"
 	"goGinGormProject/internal/core/ports"
 	"goGinGormProject/pkg/database/postgres"
 	"gorm.io/gorm"
@@ -22,7 +23,9 @@ func (p *postRepository) GetPostByUUID(uuid string) (post domain.Post, err error
 	if post.UUID != "" {
 		return post, nil
 	} else {
-		return post, fmt.Errorf(`post by uuid "%s" not found`, uuid)
+		return post, &errors.NotFoundError{
+			Message: fmt.Sprintf(`post by uuid '%s' not found`, uuid),
+		}
 	}
 }
 
@@ -44,7 +47,9 @@ func (p *postRepository) UpdatePostByUUID(uuid string, post domain.Post) (update
 	p.DB.First(&updatedPost, "uuid = ?", uuid)
 
 	if updatedPost.UUID == "" {
-		return updatedPost, fmt.Errorf(`post by uuid "%s" not found`, uuid)
+		return updatedPost, &errors.NotFoundError{
+			Message: fmt.Sprintf(`post by uuid '%s' not found`, uuid),
+		}
 	}
 
 	p.DB.Model(&updatedPost).Updates(post)
@@ -61,6 +66,8 @@ func (p *postRepository) DeletePostByUUID(uuid string) error {
 		p.DB.Delete(&domain.Post{}, "uuid = ?", uuid)
 		return nil
 	} else {
-		return fmt.Errorf(`post by uuid "%s" not found`, uuid)
+		return &errors.NotFoundError{
+			Message: fmt.Sprintf(`post by uuid '%s' not found`, uuid),
+		}
 	}
 }

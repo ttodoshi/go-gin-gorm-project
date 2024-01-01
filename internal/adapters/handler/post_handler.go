@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"goGinGormProject/internal/adapters/dto"
+	"goGinGormProject/internal/core/errors"
 	"goGinGormProject/internal/core/ports"
 	"log"
 )
@@ -21,7 +22,7 @@ func (h *PostHandler) GetPostByUUID(c *gin.Context) {
 	post, err := h.svc.GetPostByUUID(uuid)
 
 	if err != nil {
-		c.Status(404)
+		err = c.Error(err)
 		return
 	}
 	c.JSON(200, post)
@@ -30,7 +31,7 @@ func (h *PostHandler) GetPostByUUID(c *gin.Context) {
 func (h *PostHandler) GetPosts(c *gin.Context) {
 	posts, err := h.svc.GetPosts()
 	if err != nil {
-		c.Status(500)
+		err = c.Error(err)
 		return
 	}
 	c.JSON(200, posts)
@@ -39,8 +40,9 @@ func (h *PostHandler) GetPosts(c *gin.Context) {
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	var createPostDto dto.CreatePostDto
 
-	err := c.Bind(&createPostDto)
+	err := c.ShouldBindJSON(&createPostDto)
 	if err != nil {
+		err = c.Error(&errors.BodyMappingError{Message: "error mapping body"})
 		log.Print("error mapping body")
 		return
 	}
@@ -48,7 +50,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	postUUID, err := h.svc.CreatePost(createPostDto)
 
 	if err != nil {
-		c.Status(500)
+		err = c.Error(err)
 		return
 	}
 
@@ -62,15 +64,16 @@ func (h *PostHandler) UpdatePostByUUID(c *gin.Context) {
 
 	var updatePostDto dto.UpdatePostDto
 
-	err := c.Bind(&updatePostDto)
+	err := c.ShouldBindJSON(&updatePostDto)
 	if err != nil {
+		err = c.Error(&errors.BodyMappingError{Message: "error mapping body"})
 		log.Print("error mapping body")
 		return
 	}
 
 	updatedPost, err := h.svc.UpdatePostByUUID(uuid, updatePostDto)
 	if err != nil {
-		c.Status(404)
+		err = c.Error(err)
 		return
 	}
 	c.JSON(200, updatedPost)
@@ -81,7 +84,7 @@ func (h *PostHandler) DeletePostByUUID(c *gin.Context) {
 
 	err := h.svc.DeletePostByUUID(uuid)
 	if err != nil {
-		c.Status(404)
+		err = c.Error(err)
 		return
 	}
 	c.JSON(204, nil)
