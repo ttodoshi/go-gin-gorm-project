@@ -7,21 +7,23 @@ import (
 	"goGinGormProject/internal/core/ports"
 	"goGinGormProject/internal/core/servises"
 	"goGinGormProject/pkg/env"
-	"log"
+	"goGinGormProject/pkg/logging"
 )
 
 var (
 	postService ports.PostService
+	log         logging.Logger
 )
 
 func init() {
 	env.LoadEnvVariables()
+	log = logging.GetLogger()
 }
 
-// TODO: logging, tests
+// TODO: tests
 func main() {
 	postRepository := postgres.NewPostRepository()
-	postService = servises.NewPostService(postRepository)
+	postService = servises.NewPostService(postRepository, log)
 	initRoutes()
 }
 
@@ -36,7 +38,7 @@ func initRoutes() {
 
 	v1PostsGroup := v1ApiGroup.Group("/posts")
 	{
-		postHandler := handler.NewPostHandler(postService)
+		postHandler := handler.NewPostHandler(postService, log)
 		v1PostsGroup.GET("/:uuid", postHandler.GetPostByUUID)
 		v1PostsGroup.GET("/", postHandler.GetPosts)
 		v1PostsGroup.POST("/", postHandler.CreatePost)

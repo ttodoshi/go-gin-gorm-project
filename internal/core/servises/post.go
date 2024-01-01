@@ -6,21 +6,25 @@ import (
 	"goGinGormProject/internal/core/domain"
 	"goGinGormProject/internal/core/errors"
 	"goGinGormProject/internal/core/ports"
-	"log"
+	"goGinGormProject/pkg/logging"
 )
 
 type PostService struct {
 	repo ports.PostRepository
+	log  logging.Logger
 }
 
-func NewPostService(repo ports.PostRepository) ports.PostService {
-	return &PostService{repo: repo}
+func NewPostService(repo ports.PostRepository, log logging.Logger) ports.PostService {
+	return &PostService{
+		repo: repo,
+		log:  log,
+	}
 }
 
-func (p *PostService) GetPostByUUID(uuid string) (getPostDto dto.GetPostDto, err error) {
-	post, err := p.repo.GetPostByUUID(uuid)
+func (s *PostService) GetPostByUUID(uuid string) (getPostDto dto.GetPostDto, err error) {
+	post, err := s.repo.GetPostByUUID(uuid)
 	if err != nil {
-		log.Printf(`error getting post by uuid: '%s' due to error: %v`, uuid, err)
+		s.log.Infof(`error getting post by uuid: '%s' due to error: %v`, uuid, err)
 		return getPostDto, err
 	}
 
@@ -31,8 +35,8 @@ func (p *PostService) GetPostByUUID(uuid string) (getPostDto dto.GetPostDto, err
 	return getPostDto, nil
 }
 
-func (p *PostService) GetPosts() (postsDto []dto.GetPostDto, err error) {
-	posts := p.repo.GetPosts()
+func (s *PostService) GetPosts() (postsDto []dto.GetPostDto, err error) {
+	posts := s.repo.GetPosts()
 	err = copier.Copy(&postsDto, &posts)
 	if err != nil {
 		return postsDto, &errors.MappingError{Message: `struct mapping error`}
@@ -40,22 +44,22 @@ func (p *PostService) GetPosts() (postsDto []dto.GetPostDto, err error) {
 	return postsDto, nil
 }
 
-func (p *PostService) CreatePost(createPostDto dto.CreatePostDto) (uuid string, err error) {
+func (s *PostService) CreatePost(createPostDto dto.CreatePostDto) (uuid string, err error) {
 	var post domain.Post
 	err = copier.Copy(&post, &createPostDto)
 	if err != nil {
 		return "", &errors.MappingError{Message: `struct mapping error`}
 	}
 
-	uuid, err = p.repo.CreatePost(post)
+	uuid, err = s.repo.CreatePost(post)
 	if err != nil {
-		log.Printf("%v", err)
+		s.log.Infof("%v", err)
 		return "", err
 	}
 	return uuid, nil
 }
 
-func (p *PostService) UpdatePostByUUID(uuid string, updatePostDto dto.UpdatePostDto) (getPostDto dto.GetPostDto, err error) {
+func (s *PostService) UpdatePostByUUID(uuid string, updatePostDto dto.UpdatePostDto) (getPostDto dto.GetPostDto, err error) {
 	var post domain.Post
 	err = copier.Copy(&post, &updatePostDto)
 	if err != nil {
@@ -63,9 +67,9 @@ func (p *PostService) UpdatePostByUUID(uuid string, updatePostDto dto.UpdatePost
 	}
 
 	var updatedPost domain.Post
-	updatedPost, err = p.repo.UpdatePostByUUID(uuid, post)
+	updatedPost, err = s.repo.UpdatePostByUUID(uuid, post)
 	if err != nil {
-		log.Printf(`error updating post by uuid: '%s' due to error: %v`, uuid, err)
+		s.log.Infof(`error updating post by uuid: '%s' due to error: %v`, uuid, err)
 		return getPostDto, err
 	}
 
@@ -77,10 +81,10 @@ func (p *PostService) UpdatePostByUUID(uuid string, updatePostDto dto.UpdatePost
 	return getPostDto, nil
 }
 
-func (p *PostService) DeletePostByUUID(uuid string) error {
-	err := p.repo.DeletePostByUUID(uuid)
+func (s *PostService) DeletePostByUUID(uuid string) error {
+	err := s.repo.DeletePostByUUID(uuid)
 	if err != nil {
-		log.Printf(`error deleting post by uuid: '%s' due to error: %v`, uuid, err)
+		s.log.Infof(`error deleting post by uuid: '%s' due to error: %v`, uuid, err)
 		return err
 	}
 	return nil

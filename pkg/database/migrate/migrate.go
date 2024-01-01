@@ -20,6 +20,6 @@ func init() {
 func main() {
 	err := db.AutoMigrate(&domain.Post{})
 	if err != nil {
-		log.Fatalf("error while migrating")
+		log.Fatal("error while migrating")
 	}
 }

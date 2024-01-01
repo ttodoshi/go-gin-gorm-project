@@ -5,15 +5,19 @@ import (
 	"goGinGormProject/internal/adapters/dto"
 	"goGinGormProject/internal/core/errors"
 	"goGinGormProject/internal/core/ports"
-	"log"
+	"goGinGormProject/pkg/logging"
 )
 
 type PostHandler struct {
 	svc ports.PostService
+	log logging.Logger
 }
 
-func NewPostHandler(svc ports.PostService) *PostHandler {
-	return &PostHandler{svc: svc}
+func NewPostHandler(svc ports.PostService, log logging.Logger) *PostHandler {
+	return &PostHandler{
+		svc: svc,
+		log: log,
+	}
 }
 
 func (h *PostHandler) GetPostByUUID(c *gin.Context) {
@@ -43,7 +47,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	err := c.ShouldBindJSON(&createPostDto)
 	if err != nil {
 		err = c.Error(&errors.BodyMappingError{Message: "error mapping body"})
-		log.Print("error mapping body")
+		h.log.Error("error mapping body")
 		return
 	}
 
@@ -67,7 +71,7 @@ func (h *PostHandler) UpdatePostByUUID(c *gin.Context) {
 	err := c.ShouldBindJSON(&updatePostDto)
 	if err != nil {
 		err = c.Error(&errors.BodyMappingError{Message: "error mapping body"})
-		log.Print("error mapping body")
+		h.log.Error("error mapping body")
 		return
 	}
 
