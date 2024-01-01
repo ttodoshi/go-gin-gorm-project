@@ -6,9 +6,12 @@ import (
 )
 
 func LoadEnvVariables() {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("error loading .env file")
+		err = godotenv.Load(".env.docker")
+		if err != nil {
+			log.Fatal("error loading .env file")
+		}
 	}
 	err = godotenv.Overload(".env.local")
 	if err != nil {

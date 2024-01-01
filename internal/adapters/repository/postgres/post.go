@@ -5,7 +5,7 @@ import (
 	"goGinGormProject/internal/core/domain"
 	"goGinGormProject/internal/core/errors"
 	"goGinGormProject/internal/core/ports"
-	"goGinGormProject/pkg/database/postgres"
+	"goGinGormProject/pkg/database"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,7 @@ type postRepository struct {
 }
 
 func NewPostRepository() ports.PostRepository {
-	return &postRepository{DB: postgres.ConnectToDb()}
+	return &postRepository{DB: database.ConnectToDb()}
 }
 
 func (p *postRepository) GetPostByUUID(uuid string) (post domain.Post, err error) {

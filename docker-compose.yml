@@ -32,6 +32,15 @@ services:
       postgres:
     restart: unless-stopped
 
+  post_service:
+    container_name: post_service_container
+    build: .
+    ports:
+      - "8080:8080"
+    command: go run cmd/main/main.go
+    networks:
+      postgres:
+
 networks:
   postgres:
     driver: bridge

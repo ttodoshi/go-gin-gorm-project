@@ -1,6 +1,7 @@
-package postgres
+package database
 
 import (
+	"goGinGormProject/internal/core/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -20,6 +21,10 @@ func ConnectToDb() *gorm.DB {
 		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
 			log.Fatal("failed to connect to database")
+		}
+		err = db.AutoMigrate(&domain.Post{})
+		if err != nil {
+			log.Fatal("error while migrating")
 		}
 	})
 	return db
