@@ -8,13 +8,6 @@ import (
 func LoadEnvVariables() {
 	err := godotenv.Load()
 	if err != nil {
-		err = godotenv.Load(".env.docker")
-		if err != nil {
-			log.Fatal("error loading .env file")
-		}
-	}
-	err = godotenv.Overload(".env.local")
-	if err != nil {
-		recover()
+		log.Print("no .env file found")
 	}
 }

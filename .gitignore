@@ -21,9 +21,6 @@ bin
 # Go workspace file
 go.work
 
-# Env files
-.env.local
-
 # Goland files
 .idea
 

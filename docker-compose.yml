@@ -37,7 +37,8 @@ services:
     build: .
     ports:
       - "8080:8080"
-    command: go run cmd/main/main.go
+    env_file:
+      - .env.docker
     networks:
       postgres:
 

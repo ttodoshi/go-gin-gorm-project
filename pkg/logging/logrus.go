@@ -11,30 +11,6 @@ import (
 
 var e *logrus.Entry
 
-func GetLogger() Logger {
-	return e
-}
-
-type Logger interface {
-	Print(args ...interface{})
-	Printf(format string, args ...interface{})
-
-	Trace(args ...interface{})
-	Tracef(format string, args ...interface{})
-	Debug(args ...interface{})
-	Debugf(format string, args ...interface{})
-	Info(args ...interface{})
-	Infof(format string, args ...interface{})
-	Warn(args ...interface{})
-	Warnf(format string, args ...interface{})
-	Error(args ...interface{})
-	Errorf(format string, args ...interface{})
-	Fatal(args ...interface{})
-	Fatalf(format string, args ...interface{})
-	Panic(args ...interface{})
-	Panicf(format string, args ...interface{})
-}
-
 func init() {
 	l := logrus.New()
 	l.SetReportCaller(true)
@@ -64,7 +40,20 @@ func init() {
 		LogLevels: logrus.AllLevels,
 	})
 
-	l.SetLevel(logrus.TraceLevel)
+	switch os.Getenv("LOG_LEVEL") {
+	case Trace:
+		l.SetLevel(logrus.TraceLevel)
+	case Debug:
+		l.SetLevel(logrus.DebugLevel)
+	case Info:
+		l.SetLevel(logrus.InfoLevel)
+	case Warn:
+		l.SetLevel(logrus.WarnLevel)
+	case Error:
+		l.SetLevel(logrus.ErrorLevel)
+	default:
+		l.SetLevel(logrus.DebugLevel)
+	}
 
 	e = logrus.NewEntry(l)
 }

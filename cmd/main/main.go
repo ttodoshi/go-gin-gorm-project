@@ -8,6 +8,12 @@ import (
 	"goGinGormProject/internal/core/servises"
 	"goGinGormProject/pkg/env"
 	"goGinGormProject/pkg/logging"
+	"os"
+)
+
+const (
+	Dev  = "dev"
+	Prod = "prod"
 )
 
 var (
@@ -17,6 +23,9 @@ var (
 
 func init() {
 	env.LoadEnvVariables()
+	if os.Getenv("PROFILE") == Prod {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	log = logging.GetLogger()
 }
 
@@ -30,7 +39,10 @@ func main() {
 func initRoutes() {
 	r := gin.Default()
 
+	log.Info("initializing error handling middleware")
 	r.Use(handler.ErrorHandlerMiddleware())
+
+	log.Info("initializing handlers")
 
 	apiGroup := r.Group("/api")
 
@@ -45,6 +57,8 @@ func initRoutes() {
 		v1PostsGroup.PUT("/:uuid", postHandler.UpdatePostByUUID)
 		v1PostsGroup.DELETE("/:uuid", postHandler.DeletePostByUUID)
 	}
+
+	log.Infof("starting server on port :%s", os.Getenv("PORT"))
 
 	err := r.Run()
 	if err != nil {

@@ -21,6 +21,8 @@ func NewPostHandler(svc ports.PostService, log logging.Logger) *PostHandler {
 }
 
 func (h *PostHandler) GetPostByUUID(c *gin.Context) {
+	h.log.Debug("received get post by uuid request")
+
 	uuid := c.Param("uuid")
 
 	post, err := h.svc.GetPostByUUID(uuid)
@@ -33,6 +35,8 @@ func (h *PostHandler) GetPostByUUID(c *gin.Context) {
 }
 
 func (h *PostHandler) GetPosts(c *gin.Context) {
+	h.log.Debug("received get posts request")
+
 	posts, err := h.svc.GetPosts()
 	if err != nil {
 		err = c.Error(err)
@@ -42,12 +46,14 @@ func (h *PostHandler) GetPosts(c *gin.Context) {
 }
 
 func (h *PostHandler) CreatePost(c *gin.Context) {
+	h.log.Debug("received create post request")
+
 	var createPostDto dto.CreatePostDto
 
 	err := c.ShouldBindJSON(&createPostDto)
 	if err != nil {
-		err = c.Error(&errors.BodyMappingError{Message: "error mapping body"})
-		h.log.Error("error mapping body")
+		err = c.Error(&errors.BodyMappingError{Message: "error while mapping body"})
+		h.log.Warn("error while mapping body")
 		return
 	}
 
@@ -64,14 +70,16 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 }
 
 func (h *PostHandler) UpdatePostByUUID(c *gin.Context) {
+	h.log.Debug("received update post request")
+
 	uuid := c.Param("uuid")
 
 	var updatePostDto dto.UpdatePostDto
 
 	err := c.ShouldBindJSON(&updatePostDto)
 	if err != nil {
-		err = c.Error(&errors.BodyMappingError{Message: "error mapping body"})
-		h.log.Error("error mapping body")
+		err = c.Error(&errors.BodyMappingError{Message: "error while mapping body"})
+		h.log.Warn("error while mapping body")
 		return
 	}
 
@@ -84,6 +92,8 @@ func (h *PostHandler) UpdatePostByUUID(c *gin.Context) {
 }
 
 func (h *PostHandler) DeletePostByUUID(c *gin.Context) {
+	h.log.Debug("received delete post request")
+
 	uuid := c.Param("uuid")
 
 	err := h.svc.DeletePostByUUID(uuid)
